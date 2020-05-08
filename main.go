@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/bwmarrin/discordgo"
 	"math"
 	"math/rand"
 	"os"
@@ -9,16 +10,21 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
-
-	"github.com/bwmarrin/discordgo"
+	"time"
 )
 
 // cache tables
 var guildIDs map[string]string
 var usernames map[string]discordgo.User
 
+var supportedGames = []string {"Valorant"}
+var valorantMaps = []string {"Bind", "Split", "Haven"}
+var teamsNames = []string {"maoune", "spp"}
+var sides = []string {"CT", "T"}
+
 func main() {
-	dg, err := discordgo.New("Bot " + os.Getenv("SHUFFLEBOT_TOKEN"))
+	rand.Seed(time.Now().UnixNano())
+	dg, err := discordgo.New("Bot " + "TOKEN")
 	if err != nil {
 		fmt.Println("Error creating Discord bot: ", err)
 		return
@@ -91,22 +97,24 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	guild, err := s.Guild(gid)
+	if err != nil {
+		fmt.Println("Error while fetching guild: ", err)
+		return
+	}
+
 	// Invoked from Server (Guild)
 
-	if !strings.HasPrefix(m.Content, "!!teams") {
+	if !strings.HasPrefix(m.Content, "!teams") {
 		return
 	}
 
 	args := strings.Split(m.Content, " ")
-	if len(args) <= 1 {
-		sendReply(s, m, "Usage: `!!teams <number of teams to create> [skip username ...]`")
+	if len(args) <= 2 {
+		sendReply(s, m, "Usage: `!teams <number of teams to create> -<game you want to create teams for> [skip username ...]`")
 		return
 	}
 
-	var skipUsernames []string
-	if len(args) > 2 {
-		skipUsernames = args[2:len(args)]
-	}
 
 	_nTeams, err := strconv.ParseInt(args[1], 10, 32)
 	if err != nil {
@@ -116,6 +124,11 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	nTeams := int(_nTeams)
+
+	if nTeams > len(teamsNames) {
+		sendReply(s, m, "Actually there are only " + strconv.Itoa(len(teamsNames)) + " registered : " + strings.Join(teamsNames, ", "))
+		return
+	}
 
 	if nTeams <= 0 || nTeams >= 100 {
 		if gid == "223518751650217994" {
@@ -127,12 +140,40 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	guild, err := s.Guild(gid)
-	if err != nil {
-		fmt.Println("Error while fetching guild: ", err)
-		return
+
+	var skipUsernames []string
+	if len(args) > 3 {
+		skipUsernames = args[3:len(args)]
 	}
 
+	if args[2][0] != '-' {
+		sendReply(s, m, "You need to specify the game you want to build teams to")
+		return
+	}
+	if args[2][1:] == "v" {
+		createTeamValorant(s, m, guild, nTeams, skipUsernames)
+	} else {
+		sendReply(s, m, "Games actually supported : " + strings.Join(supportedGames, ", "))
+		return
+	}
+}
+
+func shuffleList(baseList []string) []string {
+	var shuffledList []string
+
+	// shuffle by connected users
+	idx := rand.Perm(len(baseList))
+
+	for _, newIdx := range idx {
+		shuffledList = append(shuffledList, baseList[newIdx])
+	}
+	return shuffledList
+}
+
+
+// Different games
+
+func createTeamValorant(s *discordgo.Session, m *discordgo.MessageCreate, guild *discordgo.Guild, nTeams int, skipUsernames []string) {
 	// find users voice channel & fetch connected users
 	voiceChannelUsers := map[string][]string{}
 	var sourceVoiceChannel string
@@ -176,13 +217,10 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	// shuffle by connected users
-	idx := rand.Perm(totalUserCount)
+
 
 	var shuffledUsers []string
-	for _, newIdx := range idx {
-		shuffledUsers = append(shuffledUsers, voiceChannelUsers[sourceVoiceChannel][newIdx])
-	}
+	shuffledUsers = shuffleList(voiceChannelUsers[sourceVoiceChannel])
 
 	// devide into {nTeams} teams
 	result := make([][]string, nTeams)
@@ -193,9 +231,11 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	fmt.Println(result)
 
 	// send message
-	outputString := fmt.Sprintf("created %d team(s)!\n", nTeams)
+	outputString := fmt.Sprintf("created %d team(s) for a Valorant game!\n", nTeams)
 	for i := 0; i < nTeams; i++ {
-		outputString += fmt.Sprintf("Team%d: %s\n", i+1, strings.Join(result[i], ", "))
+		outputString += fmt.Sprintf(sides[i % 2] + " :: Team %s: %s\n", teamsNames[i], strings.Join(result[i], ", "))
 	}
+	outputString += fmt.Sprintf("Map order : %s \n", strings.Join(shuffleList(valorantMaps), ", "))
+
 	sendReply(s, m, outputString)
 }
