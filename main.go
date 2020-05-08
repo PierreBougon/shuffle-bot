@@ -24,7 +24,8 @@ var sides = []string {"CT", "T"}
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
-	dg, err := discordgo.New("Bot " + "TOKEN")
+	dg, err := discordgo.New("Bot " + os.Getenv("SHUFFLEBOT_TOKEN"))
+
 	if err != nil {
 		fmt.Println("Error creating Discord bot: ", err)
 		return
