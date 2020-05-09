@@ -27,6 +27,8 @@ func main() {
 
 	go configRoutes()
 
+	fmt.Println("Starting bot")
+
 	rand.Seed(time.Now().UnixNano())
 	dg, err := discordgo.New("Bot " + os.Getenv("SHUFFLEBOT_TOKEN"))
 
@@ -56,6 +58,12 @@ func main() {
 func configRoutes() {
 	//Configure http routes
 
+	// Get port from .env file, we did not specify any port so this should return an empty string when tested locally
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "443"
+	}
+
 	//Ping route to wake up the app on heroku
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "I am a discord Bot created in order to randomly create teams from a vocal discord chat")
@@ -63,7 +71,10 @@ func configRoutes() {
 	http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Pong")
 	})
-	http.ListenAndServe(":443", nil)
+	err := http.ListenAndServe(":"+port, nil)
+	if err != nil {
+		fmt.Print(err)
+	}
 }
 
 func sendReply(s *discordgo.Session, m *discordgo.MessageCreate, str string) {
