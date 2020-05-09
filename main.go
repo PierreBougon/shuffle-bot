@@ -57,10 +57,13 @@ func configRoutes() {
 	//Configure http routes
 
 	//Ping route to wake up the app on heroku
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "I am a discord Bot created in order to randomly create teams from a vocal discord chat")
+	})
 	http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Pong")
 	})
-	http.ListenAndServe(":80", nil)
+	http.ListenAndServe(":443", nil)
 }
 
 func sendReply(s *discordgo.Session, m *discordgo.MessageCreate, str string) {
