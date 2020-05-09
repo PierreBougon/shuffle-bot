@@ -5,6 +5,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"math"
 	"math/rand"
+	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
@@ -23,6 +24,9 @@ var teamsNames = []string {"maoune", "spp"}
 var sides = []string {"CT", "T"}
 
 func main() {
+
+	configRoutes()
+
 	rand.Seed(time.Now().UnixNano())
 	dg, err := discordgo.New("Bot " + os.Getenv("SHUFFLEBOT_TOKEN"))
 
@@ -47,6 +51,16 @@ func main() {
 	<-sc
 
 	dg.Close()
+}
+
+func configRoutes() {
+	//Configure http routes
+
+	//Ping route to wake up the app on heroku
+	http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Pong")
+	})
+	http.ListenAndServe(":80", nil)
 }
 
 func sendReply(s *discordgo.Session, m *discordgo.MessageCreate, str string) {
