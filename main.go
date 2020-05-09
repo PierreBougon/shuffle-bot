@@ -25,7 +25,7 @@ var sides = []string {"CT", "T"}
 
 func main() {
 
-	configRoutes()
+	go configRoutes()
 
 	rand.Seed(time.Now().UnixNano())
 	dg, err := discordgo.New("Bot " + os.Getenv("SHUFFLEBOT_TOKEN"))
