@@ -154,11 +154,6 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	nTeams := int(_nTeams)
 
-	if nTeams > len(teamsNames) {
-		sendReply(s, m, "Actually there are only " + strconv.Itoa(len(teamsNames)) + " registered : " + strings.Join(teamsNames, ", "))
-		return
-	}
-
 	if nTeams <= 0 || nTeams >= 100 {
 		if gid == "223518751650217994" {
 			// for internal uses
@@ -261,8 +256,17 @@ func createTeamValorant(s *discordgo.Session, m *discordgo.MessageCreate, guild 
 
 	// send message
 	outputString := fmt.Sprintf("created %d team(s) for a Valorant game!\n", nTeams)
+	var teamName string
+
 	for i := 0; i < nTeams; i++ {
-		outputString += fmt.Sprintf(sides[i % 2] + " :: Team %s: %s\n", teamsNames[i], strings.Join(result[i], ", "))
+
+		if i < len(teamsNames) {
+			teamName = teamsNames[i]
+		} else {
+			teamName = "xxx"
+		}
+
+		outputString += fmt.Sprintf(sides[i % 2] + " :: Team %s: %s\n", teamName, strings.Join(result[i], ", "))
 	}
 	outputString += fmt.Sprintf("Map order : %s \n", strings.Join(shuffleList(valorantMaps), ", "))
 
