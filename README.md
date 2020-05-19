@@ -4,18 +4,19 @@ An awesome discord bot to make shuffled teams.
 ## Usage
 After connecting to any voice channel on your server, simply type following command on your text channels to make teams.
 ```
-!!teams <N> [exclude_users]...
+!teams <N> -<G> [exclude_users]...
 ```
 
 Parameters:
 - `N` -- the number of teams to you are going to make.
+- `G` -- shortcut for the game you want to create teams for.
 - `exclude_users` -- an screen_name of users excluded on team making.
 
 Examples:
-- `!!teams` -- shows usage
-- `!!teams 2` -- creates `2` teams by voice channel users where you are in
-- `!!teams 2 userA` -- creates `2` teams without `userA`
-- `!!teams 5 userX userZ` -- creates `5` teams without `userX` and `userZ`
+- `!teams` -- shows usage
+- `!teams 2 -v` -- creates `2` teams by voice channel users where you are in for a Valorant game
+- `!teams 2 -v userA` -- creates `2` teams for a Valorant game without `userA`
+- `!teams 5 -v userX userZ` -- creates `5` teams for a Valorant game without `userX` and `userZ`
 
 ## Installation and Setup
 
