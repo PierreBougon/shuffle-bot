@@ -226,9 +226,18 @@ func createTeamValorant(s *discordgo.Session, m *discordgo.MessageCreate, guild 
 			usernames[vs.UserID] = user
 		}
 
-		if !isContain(user.Nick, skipUsernames) {
+		var usedUsername = ""
+
+		if user.Nick != "" {
+			usedUsername = user.Nick
+		} else {
+			usedUsername = user.User.Username
+
+		}
+
+		if !isContain(usedUsername, skipUsernames) {
 			voiceChannelUsers[vs.ChannelID] =
-				append(voiceChannelUsers[vs.ChannelID], user.Nick)
+				append(voiceChannelUsers[vs.ChannelID], usedUsername)
 		}
 	}
 
