@@ -30,8 +30,7 @@ func main() {
 	fmt.Println("Starting bot")
 
 	rand.Seed(time.Now().UnixNano())
-	//dg, err := discordgo.New("Bot " + os.Getenv("SHUFFLEBOT_TOKEN"))
-	dg, err := discordgo.New("Bot " + "NzA4MTQxMDE0NTAxODE4Mzk5.XsRbbg.-1y2zM7I2cZQpXD4LYUn_JhaUX0")
+	dg, err := discordgo.New("Bot " + os.Getenv("SHUFFLEBOT_TOKEN"))
 
 	if err != nil {
 		fmt.Println("Error creating Discord bot: ", err)
