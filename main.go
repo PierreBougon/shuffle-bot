@@ -16,7 +16,7 @@ import (
 
 // cache tables
 var guildIDs map[string]string
-var usernames map[string]discordgo.User
+var usernames map[string]discordgo.Member
 
 var supportedGames = []string {"Valorant"}
 var valorantMaps = []string {"Bind", "Split", "Haven"}
@@ -30,7 +30,8 @@ func main() {
 	fmt.Println("Starting bot")
 
 	rand.Seed(time.Now().UnixNano())
-	dg, err := discordgo.New("Bot " + os.Getenv("SHUFFLEBOT_TOKEN"))
+	//dg, err := discordgo.New("Bot " + os.Getenv("SHUFFLEBOT_TOKEN"))
+	dg, err := discordgo.New("Bot " + "NzA4MTQxMDE0NTAxODE4Mzk5.XsRbbg.-1y2zM7I2cZQpXD4LYUn_JhaUX0")
 
 	if err != nil {
 		fmt.Println("Error creating Discord bot: ", err)
@@ -38,7 +39,7 @@ func main() {
 	}
 
 	guildIDs = make(map[string]string)
-	usernames = make(map[string]discordgo.User)
+	usernames = make(map[string]discordgo.Member)
 	dg.AddHandler(messageHandler)
 	dg.AddHandler(userPresenceUpdateHandler)
 
@@ -96,7 +97,13 @@ func userPresenceUpdateHandler(s *discordgo.Session, p *discordgo.PresenceUpdate
 	if p.User.Username != "" {
 		// update cache
 		fmt.Println("Username changed: " + p.User.Username)
-		usernames[p.User.ID] = *p.User
+		usernames[p.User.ID].User.Username = p.User.Username
+	}
+	if p.Nick != "" {
+		// update cache
+		fmt.Println("Nick changed: " + p.Nick)
+		var member = usernames[p.User.ID]
+		member.Nick = p.Nick
 	}
 }
 
@@ -210,7 +217,7 @@ func createTeamValorant(s *discordgo.Session, m *discordgo.MessageCreate, guild 
 		user, ok := usernames[vs.UserID]
 		if !ok {
 			// cache MISS
-			u, err := s.User(vs.UserID)
+			u, err := s.GuildMember(guild.ID, vs.UserID)
 			if err != nil {
 				fmt.Println("Error while fetching username")
 				sendReply(s, m, "Error: unknown error.")
@@ -220,9 +227,9 @@ func createTeamValorant(s *discordgo.Session, m *discordgo.MessageCreate, guild 
 			usernames[vs.UserID] = user
 		}
 
-		if !isContain(user.Username, skipUsernames) {
+		if !isContain(user.Nick, skipUsernames) {
 			voiceChannelUsers[vs.ChannelID] =
-				append(voiceChannelUsers[vs.ChannelID], user.Username)
+				append(voiceChannelUsers[vs.ChannelID], user.Nick)
 		}
 	}
 
