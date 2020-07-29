@@ -19,7 +19,7 @@ var guildIDs map[string]string
 var usernames map[string]discordgo.Member
 
 var supportedGames = []string {"Valorant"}
-var valorantMaps = []string {"Bind", "Split", "Haven"}
+var valorantMaps = []string {"Bind", "Split", "Haven", "Ascent"}
 var teamsNames = []string {"maoune", "spp"}
 var sides = []string {"CT", "T"}
 
